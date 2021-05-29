@@ -6,18 +6,26 @@ const router = express.Router();
 const axios = require('axios');
 const db = require('../models');
 const User = db.User;
+const FavoriteMovies = db.FavoriteMovies;
 
 router.get('/movies',verifyToken,(req,res)=>{
     res.sendStatus(403);
 })
 
 router.get('/movies/favorite',(req,res)=>{
-    
-    axios.get(`http://www.omdbapi.com/?apikey=${API_KEY}&s=star+wars`)
-    .then((response)=>{
-        console.log("TES")
-        res.send(response.data.Search[0]["Poster"])
+    let where = { id: req.params.id };
+    FavoriteMovies.findOne({
+        where,
+        raw: true,
     })
+    .then((data) => {
+        console.log(data);
+        res.send(data);
+      })
+      .catch((err) => {
+        console.log(err);
+        return res.status(403).send({ message: "Terjadi error di server" });
+      });
 })
 
 router.post('/movies/favorite',(req,res)=>{
@@ -25,30 +33,36 @@ router.post('/movies/favorite',(req,res)=>{
     console.log(data);
 
     if (!req.body.user_id) {
-        res.status(400).send({
+        res.status(403).send({
           message: "Content can not be empty!"
         });
         return;
       }
     
-     const user = {
+     const favorite_movies = {
+        id: req.body.id,
+        title : req.body.title,
         user_id: req.body.user_id,
-        name: req.body.name,
-        password: req.body.password,
       };
     
-      User.create(user)
+      FavoriteMovies.create(favorite_movies)
         .then(datas => {
           res.send(datas);
         })
         .catch(err => {
-          res.status(500).send({
+          res.status(403).send({
             message: err.message || "Some error occurred while creating the User."
           });
         });
 })
 
 router.get('/movies/:movie_title',(req,res)=>{
+    let titles = req.params.movie_title;
+    axios.get(`http://www.omdbapi.com/?s=${titles}&apikey=${API_KEY}`)
+    .then((response)=>{
+        console.log("TES")
+        res.send(response.data)
+    })
 })
 
 

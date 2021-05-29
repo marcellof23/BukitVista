@@ -1,7 +1,7 @@
 {
   "development": {
     "username": "root",
-    "password": "bodoamats",
+    "password": "",
     "database": "UserMovie",
     "host": "localhost",
     "dialect": "mysql"
@@ -10,14 +10,14 @@
     "username": "root",
     "password": null,
     "database": "database_test",
-    "host": "localhost",
+    "host": "127.0.0.1",
     "dialect": "mysql"
   },
   "production": {
     "username": "root",
     "password": null,
     "database": "database_production",
-    "host": "localhost",
-    "dialect": "mariadb"
+    "host": "127.0.0.1",
+    "dialect": "mysql"
   }
 }

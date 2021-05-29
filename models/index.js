@@ -9,7 +9,7 @@ const sequelize = new Sequelize(
     host: "localhost",
     dialect: config.dialect,
     operatorsAliases: 0,
-    dialectOptions: {connectTimeout: 1000},
+
     poll: {
       max: config.pool.max,
       min: config.pool.min,

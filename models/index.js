@@ -2,9 +2,9 @@ const config = require("../config");
 const { Sequelize, DataTypes, Op } = require("sequelize");
 
 const sequelize = new Sequelize(
-  config.SEQUELIZE_DB,
-  config.SEQUELIZE_USER,
-  config.SEQUELIZE_PASSWORD,
+  "UserMovie",
+  "root",
+  "bodoamat",
   {
     host: "localhost",
     dialect: config.dialect,

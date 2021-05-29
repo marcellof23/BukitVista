@@ -1,12 +1,14 @@
 const config = require("../config");
 const { Sequelize, DataTypes, Op } = require("sequelize");
+const dotenv = require('dotenv');
+dotenv.config();
 
 const sequelize = new Sequelize(
-  "UserMovie",
-  "root",
-  "bodoamat",
+  process.env.SEQUELIZE_DB,
+  process.env.SEQUELIZE_USERNAME,
+  process.env.SEQUELIZE_PASSWORD,
   {
-    host: "localhost",
+    host: config.DB_HOST,
     dialect: config.dialect,
     operatorsAliases: 0,
 

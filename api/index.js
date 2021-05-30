@@ -1,11 +1,12 @@
 const express = require('express');
 const { API_KEY } = require('../config');
+const { logger } = require('../logger');
 const jwt = require('jsonwebtoken')
 const bcrypt = require("bcrypt");
-const saltRounds = 10;
 const verifyToken = require('../middlewares/jwt')
 const router = express.Router();
 const axios = require('axios');
+
 const db = require('../models');
 const User = db.User;
 const FavoriteMovies = db.FavoriteMovies;
@@ -24,34 +25,40 @@ router.get('/movies',verifyToken,(req,res)=>{
 })
 
 router.get('/movies/favorite',verifyToken,(req,res)=>{
-    console.log(verifyToken.user_id)
-    console.log("TESSSSSSSSSSSS")
-    let where = { user_id: req.params.user_id };
-    FavoriteMovies.findOne({
-        where,
-        raw: true,
+    jwt.verify(req.token,"secretkey",(err,authData)=>{
+        if(err) {
+            res.sendStatus(403);
+        }
+        else{
+            let where = { user_id: authData.user_id };
+            logger.info({ where }, 'Fetch users favorite movie from DB');
+            FavoriteMovies.findAll({
+                where,
+                raw: true,
+            })
+            .then((data) => {   
+                res.send(data);
+            })
+            .catch((err) => {
+                console.log(err);
+                return res.status(403).send({ message: "Terjadi error di server" });
+            });
+        }
     })
-    .then((data) => {
-        console.log(data);
-        res.send(data);
-      })
-      .catch((err) => {
-        console.log(err);
-        return res.status(403).send({ message: "Terjadi error di server" });
-      });
+    
 })
 
 router.post('/movies/favorite',verifyToken,(req,res)=>{
     const data = req.body
-    console.log(data);
 
     if (!req.body.user_id) {
         res.status(403).send({
           message: "Content can not be empty!"
         });
         return;
-      }
-    
+    }
+    const users = req.body.user_id;
+    logger.info({ users }, 'Post users favorite movie to DB');
      const favorite_movies = {
         id: req.body.id,
         title : req.body.title,
@@ -71,13 +78,13 @@ router.post('/movies/favorite',verifyToken,(req,res)=>{
 
 router.get('/movies/:movie_title',verifyToken,(req,res)=>{
     let titles = req.params.movie_title;
+    logger.info({ titles }, 'Fetch movie by title');
     axios.get(`http://www.omdbapi.com/?s=${titles}&apikey=${API_KEY}`)
     .then((response)=>{
         arrPoster = []
         response.data.Search.forEach(el => {
             arrPoster.push(el['Poster'])
         })
-        console.log(arrPoster)
         res.send(JSON.stringify(arrPoster))
     })
 })
@@ -85,17 +92,12 @@ router.get('/movies/:movie_title',verifyToken,(req,res)=>{
 
 
 router.post('/api/regist', async(req,res)=>{
-    //$2b$10$lIR5a1MwjLT2JZQMoU0gl.agYff0wQkB8sf6EZHIQlWNNP/ZTzFO2
-    //eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJfaWQiOjUsIm5hbWUiOiJleGFtcGxlQGdtYWlsLmNvbSIsInBhc3N3b3JkIjoiMTIzIn0sImlhdCI6MTYyMjM0OTcwM30.X9EN0XXZvUrInTEQpBpT4Tuu9sN_8RwzwS8ycpZtU5o
-    // token baru : eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJfaWQiOjUsIm5hbWUiOiJleGFtcGxlQGdtYWlsLmNvbSIsInBhc3N3b3JkIjoiMTIzIn0sImlhdCI6MTYyMjM1NzY4N30.dPpwGffErjl3Fthl1Udjqz-HODfEMvk2_1AQb0NbxeM
-    
     bcrypt.hash(req.body.password, 10).then((hash) => {
         const users = {
             user_id: req.body.user_id,
             name: req.body.name,
             password: hash
         };
-        console.log(hash)
         User.create(users)
         .then(datas => {
             res.send(datas);
@@ -116,15 +118,11 @@ router.post('/api/signin',(req,res)=>{
         raw: true,
     }).then(user => {
         if (!user) {
-            console.log(user)
             return res.status(401).json({
                 message: "Authentication failed"
             });
         }
         getUser = user;
-        if(bcrypt.compare(req.body.password, user.password)) {
-            console.log("berhasillllllllllllll")
-        }
         return bcrypt.compare(req.body.password, user.password);
     }).then((response) => {
         if (!response) {
@@ -133,13 +131,15 @@ router.post('/api/signin',(req,res)=>{
             });
         }
         let jwtToken = jwt.sign({
-            user_id: getUser.email,
+            user_id: getUser.user_id,
             name: getUser.name
         }, "secretkey", {
             expiresIn: "1h"
         });
-        console.log("INI TOKENNYA WOIIII")
-        console.log(jwtToken)
+        res.cookie("token", jwtToken, {
+			httpOnly: true,
+			maxAge: 90000,
+		});
         res.status(200).json({
             token: jwtToken,
             expiresIn: 3600,
@@ -162,8 +162,6 @@ router.post('/api/profile',verifyToken,async(req,res)=>{
 
     if (user) {
     jwt.verify(req.token,'secretkey',async(err,authData)=>{
-        console.log(authData.password)
-        console.log(user.password)
         const validPassword = await bcrypt.compare(authData.password, user.password);
         if(err)
             res.sendStatus(403);

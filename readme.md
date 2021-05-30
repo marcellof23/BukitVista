@@ -1,6 +1,6 @@
 ### Requirements
 <ul>
-<li>Node js >= 14</li> 
+<li>Node js with version above or equal 14</li> 
 <li>Npm</li> 
 <li>Mysql</li> 
 <li>And all other dependecies can be installed via package.json</li>

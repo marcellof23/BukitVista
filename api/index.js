@@ -26,6 +26,7 @@ router.get('/movies',verifyToken,(req,res)=>{
 
 router.get('/movies/favorite',verifyToken,(req,res)=>{
     jwt.verify(req.token,"secretkey",(err,authData)=>{
+        
         if(err) {
             res.sendStatus(403);
         }

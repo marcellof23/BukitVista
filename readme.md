@@ -10,7 +10,6 @@
 
 
 ### How To Start
-##### 💻 For Windows 💻
 <ul>
 <li>Clone this reporsitory
 <li>then npm install</li>
@@ -58,6 +57,6 @@ Output
 {
     "id" : 30,
     "title" : "tes",
-    "user_id" : 123
+    "user_id" : 125
 }
 ```

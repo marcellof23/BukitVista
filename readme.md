@@ -1,7 +1,10 @@
 ### Requirements
-Node js >= 14
-npm
-Mysql 
+<ul>
+<li>Node js with version above or equal 14</li> 
+<li>Npm</li> 
+<li>Mysql</li> 
+<li>And all other dependecies can be installed via package.json</li>
+</ul>
 
 
 ### How To Start
@@ -11,10 +14,11 @@ Mysql
 <li>then npm install</li>
 <li>after installation, run with command nodemon server</li>
 <li>Use API /api/regist to create new user</li>
-<li>Use API /api/sigin to get bearer token</li>
-<li>Use API get /movie/favorite to get all users favorite movies</li>
-<li>Use API post /movie/favorite to insert users new favorite movies</li>
-<li>Use API post /movie/:movie_title to fetch movie by title</li>
+<li>Use API /api/signin to get bearer token</li>
+<li>Use API get /movies/favorite to get all users favorite movies</li>
+<li>Use API post /movies/favorite to insert users new favorite movies</li>
+<li>Use API post /movies/:movie_title to fetch all poster url of movie by title</li>
+<li>Use API post /movies is forbidden </li>
 </ul>
 
 

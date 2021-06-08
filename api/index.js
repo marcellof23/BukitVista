@@ -136,10 +136,6 @@ router.post('/api/signin',(req,res)=>{
         }, "secretkey", {
             expiresIn: "1h"
         });
-        res.cookie("token", jwtToken, {
-			httpOnly: true,
-			maxAge: 90000,
-		});
         res.status(200).json({
             token: jwtToken,
             expiresIn: 3600,
